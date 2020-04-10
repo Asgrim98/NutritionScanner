@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NutritionScanner</string>
+    <string name="qr_scan">QR SCAN</string>
+    <string name="calories">Calories</string>
+    <string name="_0">0</string>
+    <string name="kcal">kcal</string>
+</resources>
