@@ -4,4 +4,6 @@
     <string name="calories">Calories</string>
     <string name="_0">0</string>
     <string name="kcal">kcal</string>
+    <string name="custom_add">Custom add</string>
+    <string name="qr_scan_Menu">QR SCAN</string>
 </resources>
