@@ -28,27 +28,44 @@ public class AddingDataActivity extends AppCompatActivity {
     EditText fat;
     EditText carbohydrates;
     EditText proteins;
+    EditText link;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        productName = findViewById(R.id.productNameEdit);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adding_data);
 
+        Product product;
+
+        productName = findViewById(R.id.productNameEdit);
         kcal = findViewById(R.id.kcalEdit);
         fat = findViewById(R.id.fatEdit);
         carbohydrates = findViewById(R.id.carbohydratesEdit);
         proteins = findViewById(R.id.proteinEdit);
+        link = findViewById(R.id.linkEdit);
 
         Intent intent = getIntent();
         final String barcode = intent.getStringExtra("barcode");
+        product = (Product) intent.getSerializableExtra("product");
 
-        if( !barcode.isEmpty()){
+
+        if( !barcode.isEmpty() ){
 
             GetUrlDataTask task = new GetUrlDataTask(barcode);
             task.execute();
+        }
+
+        if( product != null ){
+
+            productName.setText( product.getProductName() );
+            kcal.setText(product.getKcal());
+            fat.setText(product.getFat());
+            carbohydrates.setText(product.getCarbohydrates());
+            link.setText(product.getLink());
+            proteins.setText(product.getProteins());
+
         }
 
         Button result = findViewById(R.id.resultIntent);
@@ -57,7 +74,12 @@ public class AddingDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                product3 = new Product( kcal.getText().toString(), fat.getText().toString(), carbohydrates.getText().toString(), proteins.getText().toString() );
+                product3 = new Product( productName.getText().toString(),
+                        kcal.getText().toString(),
+                        fat.getText().toString(),
+                        carbohydrates.getText().toString(),
+                        proteins.getText().toString(),
+                        link.getText().toString() );
 
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("product", product3);

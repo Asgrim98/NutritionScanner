@@ -1,5 +1,7 @@
 package com.example.nutritionscanner;
 
+import android.content.ContentValues;
+
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
@@ -12,6 +14,8 @@ public class Product implements Serializable {
     private String proteins;
     private String link;
 
+    private transient ContentValues value;
+
     public Product(){}
 
     public Product(String kcal, String fat, String carbohydrates, String proteins) {
@@ -19,15 +23,32 @@ public class Product implements Serializable {
         this.fat = fat;
         this.carbohydrates = carbohydrates;
         this.proteins = proteins;
+
+        //putValues();
+    }
+
+    public void putValues(){
+
+        value = new ContentValues();
+
+        value.put(DBHelper.COL1, productName);
+        value.put(DBHelper.COL2, kcal);
+        value.put(DBHelper.COL3, fat);
+        value.put(DBHelper.COL4, carbohydrates);
+        value.put(DBHelper.COL5, proteins);
+        value.put(DBHelper.COL6, link);
     }
 
     public Product(String productName, String kcal, String fat, String carbohydrates, String proteins, String link) {
+
         this.productName = productName;
         this.kcal = kcal;
         this.fat = fat;
         this.carbohydrates = carbohydrates;
         this.proteins = proteins;
         this.link = link;
+
+       // putValues();
     }
 
     public String getProductName() {
@@ -76,5 +97,9 @@ public class Product implements Serializable {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public ContentValues getValue() {
+        return value;
     }
 }
