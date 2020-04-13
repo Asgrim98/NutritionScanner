@@ -48,7 +48,6 @@ public class AddingDataActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         final String barcode = intent.getStringExtra("barcode");
-        product = (Product) intent.getSerializableExtra("product");
 
 
         if( !barcode.isEmpty() ){
@@ -57,16 +56,6 @@ public class AddingDataActivity extends AppCompatActivity {
             task.execute();
         }
 
-        if( product != null ){
-
-            productName.setText( product.getProductName() );
-            kcal.setText(product.getKcal());
-            fat.setText(product.getFat());
-            carbohydrates.setText(product.getCarbohydrates());
-            link.setText(product.getLink());
-            proteins.setText(product.getProteins());
-
-        }
 
         Button result = findViewById(R.id.resultIntent);
 
