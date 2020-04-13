@@ -20,6 +20,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="Provider"
+            android:authorities= "com.example.NutritionScannerDB.Provider"
+            android:enabled="true"
+            android:exported="true" >
+        </provider>
+
     </application>
 
 </manifest>

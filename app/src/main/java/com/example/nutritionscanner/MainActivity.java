@@ -5,14 +5,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
-
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 
+
 import android.content.Intent;
+
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.view.ActionMode;
@@ -25,16 +27,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    Toolbar toolbar;
-    DBHelper mDBHelper;
-    SQLiteDatabase mBD;
-    ListView lv;
-    Cursor kursor;
 
+    Toolbar toolbar;
+    ListView lv;
 
     SimpleCursorAdapter dbAdapter;
 
@@ -46,23 +46,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         toolbar = findViewById(R.id.this_toolbar);
         setSupportActionBar(toolbar);
 
-        lv = findViewById(R.id.lista);
-
-        mDBHelper = new DBHelper(this);
-        mBD = mDBHelper.getWritableDatabase();
+        //mDBHelper = new DBHelper(this);
+        //mBD = mDBHelper.getWritableDatabase();
         //mBD.execSQL( DBHelper.DROP_TAB );
         //mBD.execSQL( DBHelper.CREATE);
 
-        kursor = mBD.query(true, DBHelper.TABLE,
-                new String[]{DBHelper.ID , DBHelper.COL2  ,DBHelper.COL3},
-               null, null, null,null,null,null );
-
+        lv = findViewById(R.id.lista);
         startLoader();
 
-        lv.setClickable(true);
+        //lv.setClickable(true);
 
         lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        // Capture ListView item click
         lv.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
                                           @Override
                                           public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
@@ -72,30 +66,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                                           @Override
                                           public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                                              return false;
+                                              MenuInflater pump = actionMode.getMenuInflater();
+                                              pump.inflate(R.menu.delete_menu, menu);
+                                              return true;
+
                                           }
 
                                           @Override
                                           public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
 
-                                           /*   switch (menuItem.getItemId()) {
-                                                  *//*case R.id.delete:
-                                                      SparseBooleanArray selected = listadapter.getSelectedIds();
-
-                                                      for(int i = (selected.size() - 1); i >= 0; i--) {
-                                                          if(selected.valueAt(i)) {
-                                                              ApplicationInfo selecteditem = listadapter.getItem(selected.keyAt(i));
-                                                              listadapter.remove(selecteditem);
-
-                                                              // Save the selected item in a Content Provider/Shared Pref
-                                                          }
-                                                      }
-                                                      arg0.finish();*//*
+                                              switch (menuItem.getItemId()) {
+                                                  case R.id.multiple_delete:
+                                                      //kasujZaznaczone();
                                                       return true;
+                                              }
 
-                                                  default:
-                                                      return false;
-                                              }*/
                                               return false;
                                           }
 
@@ -115,27 +100,27 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Product product;
-                Cursor cursor2 =  mBD.rawQuery("select * from " + DBHelper.TABLE, null);
+                String[] projection = { DBHelper.ID, DBHelper.COL1, DBHelper.COL2, DBHelper.COL3, DBHelper.COL4, DBHelper.COL5, DBHelper.COL6 };
+                Cursor cursor = getContentResolver().query( Provider.URI_ZAWARTOSCI, projection, null , null,null);
 
-                cursor2.moveToFirst();
+                //Cursor cursor2 =  mBD.rawQuery("select * from " + DBHelper.TABLE, null);
+
+                cursor.moveToFirst();
 
                 for(int i = 0; i < position; i++){
-                    cursor2.moveToNext();
+                    cursor.moveToNext();
                 }
 
-                String data_id = cursor2.getString(cursor2.getColumnIndex( DBHelper.ID ) );
-                String p1 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL1 ) );
-                String p2 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL2 ) );
-                String p3 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL3 ) );
-                String p4 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL4 ) );
-                String p5 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL5 ) );
-                String p6 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL6 ) );
-                product = new Product(p1,p2,p3,p4,p5,p6);
+                ArrayList<String> list = new ArrayList<>();
 
+                for (String  x : projection) {
+                    list.add( cursor.getString( cursor.getColumnIndex( x )));
+                }
+                product = new Product(list);
 
                 Intent intent = new Intent(getApplicationContext(), EditingDataActivity.class);
                 intent.putExtra("product", product); // "PRODUCT_MODE for bar codes
-                intent.putExtra("id", data_id);
+                intent.putExtra("id", list.get(0));
                 startActivityForResult(intent, 3);
             }
         });
@@ -161,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 return true;
 
             case R.id.item2:
-                Intent intent2 = new Intent(getApplicationContext(), AddingDataActivity.class);
+                Intent intent2 = new Intent(this, AddingDataActivity.class);
                 intent2.putExtra("listElement", "");
                 intent2.putExtra("barcode", ""); // "PRODUCT_MODE for bar codes
                 startActivityForResult(intent2, 2);
@@ -195,10 +180,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if( requestCode == 2 ){
 
             if(resultCode == RESULT_OK) {
+
                 Product product = (Product) data.getSerializableExtra("product");
                 product.putValues();
 
-                long row = mBD.insert(DBHelper.TABLE, null, product.getValue());
+                Uri uriNowego = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );
             }
         }
 
@@ -207,19 +193,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             if(resultCode == RESULT_OK){
 
-
                 Product product = (Product) data.getSerializableExtra( "product");
                 String id = data.getStringExtra("id");
 
                 product.putValues();
+                getContentResolver().update( Provider.URI_ZAWARTOSCI, product.getValue(),DBHelper.ID+"=" + id , null );
 
-                mBD.update(DBHelper.TABLE, product.getValue(), DBHelper.ID+"=" + id, null);
+                //mBD.update(DBHelper.TABLE, product.getValue(), DBHelper.ID+"=" + id, null);
             }
 
-            if(requestCode == RESULT_FIRST_USER){
+            if(resultCode == RESULT_FIRST_USER){
 
                 String id = data.getStringExtra("id");
-                mBD.delete(DBHelper.TABLE, DBHelper.ID + " = '" + id + "';", null);
+
+                getContentResolver().delete( Provider.URI_ZAWARTOSCI, DBHelper.ID+"=" + id, null);
+
+               // mBD.delete(DBHelper.TABLE, DBHelper.ID + " = '" + id + "';", null);
 
             }
         }
@@ -227,33 +216,39 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void startLoader(){
 
-        //getLoaderManager().initLoader(0,null,getBaseContext());
-        String[] mapFrom = new String[]{DBHelper.COL2,DBHelper.COL3};
+        getSupportLoaderManager().initLoader(0, null, this);
+
+        String[] mapFrom = new String[]{DBHelper.COL1,DBHelper.COL6};
         int[] mapTo = new int[]{R.id.productName,R.id.productLink};
-        dbAdapter = new SimpleCursorAdapter(this, R.layout.list_table,kursor,mapFrom,mapTo, 0);
+        dbAdapter = new SimpleCursorAdapter(this, R.layout.list_table, null ,mapFrom,mapTo, 0);
 
         lv.setAdapter(dbAdapter);
-
-
     }
 
-    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
 
-        return null;
+        String[] projection = { DBHelper.ID, DBHelper.COL1, DBHelper.COL6 };
+        CursorLoader loaderKursora = new CursorLoader(this,
+                Provider.URI_ZAWARTOSCI, projection, null,null, null);
+
+        return loaderKursora;
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-
         dbAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
         dbAdapter.swapCursor(null);
+    }
+
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 }
 

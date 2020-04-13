@@ -9,7 +9,7 @@
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.DayNight"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    app:title="Elo">
+    app:title="MENU">
 
 
 

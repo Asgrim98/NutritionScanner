@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
@@ -18,37 +19,36 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class AddingDataActivity extends AppCompatActivity {
 
 
-    private Product product3;
-    EditText productName;
-    EditText kcal;
-    EditText fat;
-    EditText carbohydrates;
-    EditText proteins;
-    EditText link;
+    private static final Pattern HTTPS_PATTERN = Pattern.compile("https?://.+");
+
+    private Product product;
+    EditText usProductName;
+    EditText usKcal;
+    EditText usFat;
+    EditText usCarbohydrates;
+    EditText usProteins;
+    EditText usLink;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adding_data);
 
-        Product product;
-
-        productName = findViewById(R.id.productNameEdit);
-        kcal = findViewById(R.id.kcalEdit);
-        fat = findViewById(R.id.fatEdit);
-        carbohydrates = findViewById(R.id.carbohydratesEdit);
-        proteins = findViewById(R.id.proteinEdit);
-        link = findViewById(R.id.linkEdit);
+        usProductName = findViewById(R.id.productNameEdit);
+        usKcal = findViewById(R.id.kcalEdit);
+        usFat = findViewById(R.id.fatEdit);
+        usCarbohydrates = findViewById(R.id.carbohydratesEdit);
+        usProteins = findViewById(R.id.proteinEdit);
+        usLink = findViewById(R.id.linkEdit);
 
         Intent intent = getIntent();
         final String barcode = intent.getStringExtra("barcode");
-
 
         if( !barcode.isEmpty() ){
 
@@ -63,24 +63,34 @@ public class AddingDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                product3 = new Product( productName.getText().toString(),
-                        kcal.getText().toString(),
-                        fat.getText().toString(),
-                        carbohydrates.getText().toString(),
-                        proteins.getText().toString(),
-                        link.getText().toString() );
+                final String productName = usProductName.getText().toString();
+                final String kcal = usKcal.getText().toString();
+                final String fat = usFat.getText().toString();
+                final String carbohydrates = usCarbohydrates.getText().toString();
+                final String proteins = usProteins.getText().toString();
+                final String link = usLink.getText().toString();
 
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("product", product3);
-                setResult(RESULT_OK, resultIntent);
-                finish();
+                if (productName.equals("") || kcal.equals("") || fat.equals("") || carbohydrates.equals("") || proteins.equals("") || link.equals("")) {
 
+                    Toast.makeText(AddingDataActivity.this, "FIELDS CANNOT BE EMPTY",Toast.LENGTH_LONG).show();
+                } else if ( !HTTPS_PATTERN.matcher(link).matches() ) {
+
+                    Toast.makeText(AddingDataActivity.this, "LINK MUST BE FORMATET 'https://...'",Toast.LENGTH_LONG).show();
+                } else if ( productName.length() < 3) {
+
+                    Toast.makeText(AddingDataActivity.this, "PRODUCT NAME MUST BE AT LEAST 3 CHAR",Toast.LENGTH_LONG).show();
+                } else {
+
+                    product = new Product( productName, kcal, fat, carbohydrates, proteins, link );
+
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("product", product);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                }
             }
         });
-
     }
-
-
 
     protected class GetUrlDataTask extends AsyncTask<Void, Void, JSONObject>
     {
@@ -94,10 +104,11 @@ public class AddingDataActivity extends AppCompatActivity {
         protected JSONObject doInBackground(Void... params)
         {
             JSONObject json = null;
-            String str="http://poland.openfoodfacts.org/api/v0/product/" + barcode + ".json";
+            String str="http://poland.openfoodfacts.org/api/v0/product/" + barcode + ".json";   ///Korzystam z zewnętrznego darmowego APi
+            //Niestety nie wszystkie produkty są uzględnione
 
             try {
-                json = new JSONObject(IOUtils.toString(new URL(str), StandardCharsets.UTF_8));
+                json = new JSONObject(IOUtils.toString(new URL(str), StandardCharsets.UTF_8));  ///Dane dostarczane są w formacie json
 
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
@@ -116,10 +127,28 @@ public class AddingDataActivity extends AppCompatActivity {
                     JSONObject product =  response.getJSONObject( "product" );
                     JSONObject nutriments = product.getJSONObject("nutriments");
 
-                    kcal.setText(  nutriments.getString("energy-kcal_value") );
-                    fat.setText( nutriments.getString("fat") );
-                    carbohydrates.setText( nutriments.getString("carbohydrates") );
-                    proteins.setText( nutriments.getString("proteins") );
+                    if( product.getString("product_name_pl").equals("") ){
+
+                        Toast.makeText(AddingDataActivity.this, "PRODUCT NOT FOUND",Toast.LENGTH_LONG).show();
+                    } else {
+
+                        usProductName.setText( product.getString("product_name_pl"));
+
+                        if( nutriments.getString("energy-kcal_value").equals("") ){
+
+                            usKcal.setText( "0" );
+                            usFat.setText( "0" );
+                            usCarbohydrates.setText( "0" );
+                            usProteins.setText( "0" );
+                        } else {
+
+                            usKcal.setText(  nutriments.getString("energy-kcal_value") );
+                            usFat.setText( nutriments.getString("fat") );
+                            usCarbohydrates.setText( nutriments.getString("carbohydrates") );
+                            usProteins.setText( nutriments.getString("proteins") );
+                        }
+                    }
+
 
                 } catch (JSONException ex) {
                     Log.e("App", "Failure", ex);

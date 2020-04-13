@@ -20,6 +20,7 @@ android:usesCleartextTraffic="true">
         android:layout_height="match_parent"
         android:id="@+id/lista"
         android:choiceMode="multipleChoice"
+        android:background="@drawable/list_background_selector"
 
         />
 
