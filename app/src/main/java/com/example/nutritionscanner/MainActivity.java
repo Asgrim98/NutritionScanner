@@ -15,16 +15,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -61,33 +61,81 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         lv.setClickable(true);
 
+        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        // Capture ListView item click
+        lv.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+                                          @Override
+                                          public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                                              actionMode.getMenuInflater().inflate(R.menu.delete_menu, menu);
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+
+                                           /*   switch (menuItem.getItemId()) {
+                                                  *//*case R.id.delete:
+                                                      SparseBooleanArray selected = listadapter.getSelectedIds();
+
+                                                      for(int i = (selected.size() - 1); i >= 0; i--) {
+                                                          if(selected.valueAt(i)) {
+                                                              ApplicationInfo selecteditem = listadapter.getItem(selected.keyAt(i));
+                                                              listadapter.remove(selecteditem);
+
+                                                              // Save the selected item in a Content Provider/Shared Pref
+                                                          }
+                                                      }
+                                                      arg0.finish();*//*
+                                                      return true;
+
+                                                  default:
+                                                      return false;
+                                              }*/
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public void onDestroyActionMode(ActionMode actionMode) {
+
+                                          }
+
+                                          @Override
+                                          public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+
+                                          }
+                                      });
+
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Product product;
-                //Cursor cursor = mBD.rawQuery(DBHelper.SELECT_ROW, new String[] { String.valueOf( position ) } );
-                Cursor cursor2 =  mBD.rawQuery("select * from " + DBHelper.TABLE + " where " + DBHelper.ID + "='" + String.valueOf(position + 1) + "'" , null);
+                Cursor cursor2 =  mBD.rawQuery("select * from " + DBHelper.TABLE, null);
 
-                if (cursor2.moveToFirst()){
+                cursor2.moveToFirst();
 
-                    String p1 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL1 ) );
-                    String p2 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL2 ) );
-                    String p3 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL3 ) );
-                    String p4 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL4 ) );
-                    String p5 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL5 ) );
-                    String p6 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL6 ) );
-
-                    product = new Product(p1,p2,p3,p4,p5,p6);
-                } else {
-
-                    product = new Product();
+                for(int i = 0; i < position; i++){
+                    cursor2.moveToNext();
                 }
 
+                String data_id = cursor2.getString(cursor2.getColumnIndex( DBHelper.ID ) );
+                String p1 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL1 ) );
+                String p2 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL2 ) );
+                String p3 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL3 ) );
+                String p4 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL4 ) );
+                String p5 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL5 ) );
+                String p6 = cursor2.getString(cursor2.getColumnIndex( DBHelper.COL6 ) );
+                product = new Product(p1,p2,p3,p4,p5,p6);
 
-                Intent intent = new Intent(getApplicationContext(), AddingDataActivity.class);
-                intent.putExtra("barcode", "");
+
+                Intent intent = new Intent(getApplicationContext(), EditingDataActivity.class);
                 intent.putExtra("product", product); // "PRODUCT_MODE for bar codes
+                intent.putExtra("id", data_id);
                 startActivityForResult(intent, 3);
             }
         });
@@ -146,13 +194,32 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if( requestCode == 2 ){
 
+            if(resultCode == RESULT_OK) {
+                Product product = (Product) data.getSerializableExtra("product");
+                product.putValues();
+
+                long row = mBD.insert(DBHelper.TABLE, null, product.getValue());
+            }
+        }
+
+
+        if( requestCode == 3 ){
+
             if(resultCode == RESULT_OK){
 
 
                 Product product = (Product) data.getSerializableExtra( "product");
+                String id = data.getStringExtra("id");
+
                 product.putValues();
 
-                long row = mBD.insert(DBHelper.TABLE,null, product.getValue() );
+                mBD.update(DBHelper.TABLE, product.getValue(), DBHelper.ID+"=" + id, null);
+            }
+
+            if(resultCode == RESULT_FIRST_USER){
+
+                String id = data.getStringExtra("id");
+                mBD.delete(DBHelper.TABLE, DBHelper.ID + " = '" + id + "';", null);
 
             }
         }
