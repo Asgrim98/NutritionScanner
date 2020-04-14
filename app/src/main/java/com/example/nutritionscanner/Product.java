@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 @SuppressWarnings("serial")
-public class Product implements Serializable {
+public class Product implements Serializable {  ///Chcemy przekazywac obiekt miedzy avtivity
 
     private String productName;
     private String kcal;
@@ -15,7 +15,7 @@ public class Product implements Serializable {
     private String proteins;
     private String link;
 
-    private transient ContentValues value;
+    private transient ContentValues value;    ///Nie chcemy aby ta wartosc byla serializowany poniewaz ustalamy ja dopiero po przekazaniu z activity
 
     public Product(){}
 
@@ -25,19 +25,6 @@ public class Product implements Serializable {
         this.carbohydrates = carbohydrates;
         this.proteins = proteins;
 
-        //putValues();
-    }
-
-    public void putValues(){
-
-        value = new ContentValues();
-
-        value.put(DBHelper.COL1, productName);
-        value.put(DBHelper.COL2, kcal);
-        value.put(DBHelper.COL3, fat);
-        value.put(DBHelper.COL4, carbohydrates);
-        value.put(DBHelper.COL5, proteins);
-        value.put(DBHelper.COL6, link);
     }
 
     public Product(ArrayList<String> list){
@@ -59,8 +46,20 @@ public class Product implements Serializable {
         this.proteins = proteins;
         this.link = link;
 
-       // putValues();
     }
+
+    public void putValues(){
+
+        value = new ContentValues();
+
+        value.put(DBHelper.COL1, productName);
+        value.put(DBHelper.COL2, kcal);
+        value.put(DBHelper.COL3, fat);
+        value.put(DBHelper.COL4, carbohydrates);
+        value.put(DBHelper.COL5, proteins);
+        value.put(DBHelper.COL6, link);
+    }
+
 
     public String getProductName() {
         return productName;

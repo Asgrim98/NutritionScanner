@@ -43,12 +43,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ///Kod wykorzystywany gdy chcemy stwozryc nowa tabele w BD
         //mDBHelper = new DBHelper(this);
         //mBD = mDBHelper.getWritableDatabase();
         //mBD.execSQL( DBHelper.DROP_TAB );
         //mBD.execSQL( DBHelper.CREATE);
 
-        lv = findViewById(R.id.lista);
+        lv = findViewById(R.id.lista);  ///Tworze obiekt list View i dodaje odpowiednie listenery
         startLoader();
 
         lv.setClickable(true);
@@ -65,21 +66,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 cursor.moveToFirst();
 
-                for(int i = 0; i < position; i++){
-                    cursor.moveToNext();
-                }
+                for(int i = 0; i < position; i++){  ///Ustawiam kursor na pozycje odpowiadajaca mu na listView
+                    cursor.moveToNext();            ///W przypadku gdy usuwamy elementy i uzywamy auto increment do settowania id
+                }                                   ///Wartosci te moga sie od siebie roznica np. id = 10 na 3 pozycji na liscie
 
                 ArrayList<String> list = new ArrayList<>();
 
                 for (String  x : projection) {
                     list.add( cursor.getString( cursor.getColumnIndex( x )));
                 }
-                product = new Product(list);
+                product = new Product(list);        ///Zapelniamy liste elementami z bazy danych i tworzymy obiekt produkt
 
                 cursor.close();
 
-                Intent intent = new Intent(getApplicationContext(), EditingDataActivity.class);
-                intent.putExtra("product", product); // "PRODUCT_MODE for bar codes
+                Intent intent = new Intent(getApplicationContext(), EditingDataActivity.class); ///Przechodzimy do nowej aktywnosci do ktorej wysylamy obiekt produkt oraz jego id z bd
+                intent.putExtra("product", product);
                 intent.putExtra("id", list.get(0));
                 startActivityForResult(intent, 3);
             }
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                           @Override
                                           public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
 
-                                              MenuInflater inflater = actionMode.getMenuInflater();
+                                              MenuInflater inflater = actionMode.getMenuInflater(); ///Po wejsciu w tryb multiselect zmieniamy menu w toolbar
                                               inflater.inflate(R.menu.delete_menu, menu);
                                               return true;
                                           }
@@ -103,9 +104,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                           @Override
                                           public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
 
-                                              switch (menuItem.getItemId()) {
+                                              switch (menuItem.getItemId()) {       ///Dodajemy odpowiednie akcje na wcisniecie przyicsku
                                                   case R.id.multiple_delete:
-                                                      kasujZaznaczone();
+                                                      deleteSelected();
                                                       return true;
                                               }
 
@@ -125,26 +126,28 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) { ///Dodajemy podstawowe menu do toolbara
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
+    public boolean onOptionsItemSelected(MenuItem item) {   ///Menu sklada sie z dwóch elementów
+        //Jednym jest dodanie produktu za posrednictwem Skanu QR a drugie przez podanie dnaych przez uzytkownika
+        //W przypadku skanu qr dane mozna pozniej oczywiscie edytowac
+
         switch (item.getItemId()) {
             case R.id.item1:
                 Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
+                intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); //SKAN QR
                 startActivityForResult(intent, 0);
                 return true;
 
             case R.id.item2:
                 Intent intent2 = new Intent(this, AddingDataActivity.class);
                 intent2.putExtra("listElement", "");
-                intent2.putExtra("barcode", ""); // "PRODUCT_MODE for bar codes
+                intent2.putExtra("barcode", ""); //ZWYKLE DODANIE
                 startActivityForResult(intent2, 2);
                 return true;
 
@@ -154,13 +157,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) { ///Reakcja na powrot z actviity
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0) {
+        if (requestCode == 0) { ///SKAN QR
 
             if (resultCode == RESULT_OK) {
 
                 String contents = data.getStringExtra("SCAN_RESULT");
+
+                ///W przypadku pobrania kodu QR produktu przechodzimy do nowego wspolnego ativity gdzie mozemy dodac nowy obiekt do bazy
 
                 Intent intent = new Intent(getApplicationContext(), AddingDataActivity.class );
                 intent.putExtra("barcode", contents); // "PRODUCT_MODE for bar codes
@@ -168,26 +173,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startActivityForResult( intent, 2);
 
             }
-            if (resultCode == RESULT_CANCELED) {
-            }
-
         }
 
-        if( requestCode == 2 ){
+        if( requestCode == 2 ){ //ZWYKLE DODANIE
 
             if(resultCode == RESULT_OK) {
 
                 Product product = (Product) data.getSerializableExtra("product");
                 product.putValues();
 
-                Uri newUri = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );
+                Uri newUri = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );    ///DODANIE DO BD
             }
         }
 
 
-        if( requestCode == 3 ){
+        if( requestCode == 3 ){ ///EDYCJA
 
-            if(resultCode == RESULT_OK){
+            if(resultCode == RESULT_OK){ ///ZATWIERDZENIE EDYCJI
 
                 Product product = (Product) data.getSerializableExtra( "product");
                 String id = data.getStringExtra("id");
@@ -198,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 //mBD.update(DBHelper.TABLE, product.getValue(), DBHelper.ID+"=" + id, null);
             }
 
-            if(resultCode == RESULT_FIRST_USER){
+            if(resultCode == RESULT_FIRST_USER){ ///USUNIECIE ELEMENTU
 
                 String id = data.getStringExtra("id");
 
@@ -210,9 +212,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    private void kasujZaznaczone() {
-        long[] zaznaczone = lv.getCheckedItemIds();
-        String[] projection = { DBHelper.ID, DBHelper.COL1, DBHelper.COL2, DBHelper.COL3, DBHelper.COL4, DBHelper.COL5, DBHelper.COL6 };
+    private void deleteSelected() { ///USUNICIE WIELU ELEMENTOW
+        long[] zaznaczone = lv.getCheckedItemIds(); ///Pobieramy liste id zaznaczonych elementow
 
         for (int i = 0; i < zaznaczone.length; i++) {
 

@@ -49,7 +49,6 @@ public class Provider extends ContentProvider {
         switch (typUri) {
             case TABLE:
                 kursor = DB.query(true, dbHelper.TABLE, projection, selection, selectionArgs, null, null, sortOrder, null);
-                 //kursor = DB.rawQuery(selection, null);
                 break;
             case ROW:
 

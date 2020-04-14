@@ -24,9 +24,9 @@ import java.util.regex.Pattern;
 public class AddingDataActivity extends AppCompatActivity {
 
 
-    private static final Pattern HTTPS_PATTERN = Pattern.compile("https?://.+");
+    private static final Pattern HTTPS_PATTERN = Pattern.compile("https?://.+");    ///Do sprawdzania poprawnosci
 
-    private Product product;
+    private Product product;    ///Niezbedne zmiene
     EditText usProductName;
     EditText usKcal;
     EditText usFat;
@@ -40,7 +40,7 @@ public class AddingDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adding_data);
 
-        usProductName = findViewById(R.id.productNameEdit);
+        usProductName = findViewById(R.id.productNameEdit); ///INICJALIZACJA WARTOSCI
         usKcal = findViewById(R.id.kcalEdit);
         usFat = findViewById(R.id.fatEdit);
         usCarbohydrates = findViewById(R.id.carbohydratesEdit);
@@ -48,9 +48,9 @@ public class AddingDataActivity extends AppCompatActivity {
         usLink = findViewById(R.id.linkEdit);
 
         Intent intent = getIntent();
-        final String barcode = intent.getStringExtra("barcode");
+        final String barcode = intent.getStringExtra("barcode");    ///POBRANIE WARTOSCI
 
-        if( !barcode.isEmpty() ){
+        if( !barcode.isEmpty() ){   ///Gdy uzsykalismy jakis kod kreskowy wykonywane jest asynchroncizne zadanie ktore laczy sie z internetowym api i pobiera dane
 
             GetUrlDataTask task = new GetUrlDataTask(barcode);
             task.execute();
@@ -70,6 +70,7 @@ public class AddingDataActivity extends AppCompatActivity {
                 final String proteins = usProteins.getText().toString();
                 final String link = usLink.getText().toString();
 
+                ///Validacja poprawnosci danych
                 if (productName.equals("") || kcal.equals("") || fat.equals("") || carbohydrates.equals("") || proteins.equals("") || link.equals("")) {
 
                     Toast.makeText(AddingDataActivity.this, "FIELDS CANNOT BE EMPTY",Toast.LENGTH_LONG).show();
@@ -84,7 +85,7 @@ public class AddingDataActivity extends AppCompatActivity {
                     product = new Product( productName, kcal, fat, carbohydrates, proteins, link );
 
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra("product", product);
+                    resultIntent.putExtra("product", product);  ///Jezeli wszystko poszlo zgodnie z planem zwracamy wartosci ktora pozniej dodamy do bd
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 }
@@ -127,6 +128,7 @@ public class AddingDataActivity extends AppCompatActivity {
                     JSONObject product =  response.getJSONObject( "product" );
                     JSONObject nutriments = product.getJSONObject("nutriments");
 
+                    ///W api nie wszystkie produkty sa dostepne dlatego wyswietlamy odpowiedni komunikat
                     if( product.getString("product_name_pl").equals("") ){
 
                         Toast.makeText(AddingDataActivity.this, "PRODUCT NOT FOUND",Toast.LENGTH_LONG).show();
@@ -134,6 +136,8 @@ public class AddingDataActivity extends AppCompatActivity {
 
                         usProductName.setText( product.getString("product_name_pl"));
 
+                        ///Moze sie zdarzyc ze produkt istnieje jednak nie posiada wartosci odzywczych (np. woda)
+                        ///Dlatego ustalamy wartosci domyslne na 0
                         if( nutriments.getString("energy-kcal_value").equals("") ){
 
                             usKcal.setText( "0" );
@@ -151,7 +155,7 @@ public class AddingDataActivity extends AppCompatActivity {
 
 
                 } catch (JSONException ex) {
-                    Log.e("App", "Failure", ex);
+                    Log.e("App", "Failure", ex); ///Komunikat o bledie
                 }
             }
         }

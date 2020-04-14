@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 
 public class EditingDataActivity extends AppCompatActivity {
 
-    private static final Pattern HTTPS_PATTERN = Pattern.compile("https?://.+");
+    private static final Pattern HTTPS_PATTERN = Pattern.compile("https?://.+");    ///Do sprawdzania poprawnosci
 
-    EditText usProductName;
+    EditText usProductName;     ///Niezbedne dane
     EditText usKcal;
     EditText usFat;
     EditText usCarbohydrates;
@@ -29,7 +29,7 @@ public class EditingDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editing_data);
 
-        usProductName = findViewById(R.id.productNameEdit);
+        usProductName = findViewById(R.id.productNameEdit);     ///Inicjalizacja
         usKcal = findViewById(R.id.kcalEdit);
         usFat = findViewById(R.id.fatEdit);
         usCarbohydrates = findViewById(R.id.carbohydratesEdit);
@@ -37,12 +37,12 @@ public class EditingDataActivity extends AppCompatActivity {
         usLink = findViewById(R.id.linkEdit);
 
         Intent intent = getIntent();
-        Product product = (Product) intent.getSerializableExtra("product");
+        Product product = (Product) intent.getSerializableExtra("product");     ///Pobieramy produkt i jego id aby bylo wiadomo co pozniej edytowac
         final String data_id = intent.getStringExtra("id");
 
         if( product != null ){
 
-            usProductName.setText( product.getProductName() );
+            usProductName.setText( product.getProductName() );  ///Sprawdzamy czy produkt istnieje i ustawiamy jego wartosci do labelow
             usKcal.setText(product.getKcal());
             usFat.setText(product.getFat());
             usCarbohydrates.setText(product.getCarbohydrates());
@@ -56,7 +56,6 @@ public class EditingDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-
                 final String productName = usProductName.getText().toString();
                 final String kcal = usKcal.getText().toString();
                 final String fat = usFat.getText().toString();
@@ -64,6 +63,7 @@ public class EditingDataActivity extends AppCompatActivity {
                 final String proteins = usProteins.getText().toString();
                 final String link = usLink.getText().toString();
 
+                ///WALIDACJA DANYCH
                 if (productName.equals("") || kcal.equals("") || fat.equals("") || carbohydrates.equals("") || proteins.equals("") || link.equals("")) {
 
                     Toast.makeText(EditingDataActivity.this, "FIELDS CANNOT BE EMPTY", Toast.LENGTH_LONG).show();
@@ -77,7 +77,7 @@ public class EditingDataActivity extends AppCompatActivity {
 
                     Product productResult = new Product(productName, kcal, fat, carbohydrates, proteins, link);
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra("product", productResult);
+                    resultIntent.putExtra("product", productResult);        ///Zwracamy zmodyfikowany produkt wraz z jego id aby zmienic go w bazie danych
                     resultIntent.putExtra("id", data_id);
                     setResult(RESULT_OK, resultIntent);
                     finish();
@@ -90,8 +90,8 @@ public class EditingDataActivity extends AppCompatActivity {
         www.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if( HTTPS_PATTERN.matcher(usLink.getText().toString() ).matches()){
+                ///Intent przenoszacy nas pod podana strone internetowa
+                if( HTTPS_PATTERN.matcher(usLink.getText().toString() ).matches()){ ///Pobierany jest z labela nie z wartosci BD wiec musimy sprawdzic poprawnosc
 
                     Intent browser = new Intent("android.intent.action.VIEW", Uri.parse(usLink.getText().toString()));
                     startActivity(browser);
@@ -106,7 +106,7 @@ public class EditingDataActivity extends AppCompatActivity {
         Button delete = findViewById(R.id.delete);
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {    ///Usuwanie wartosci. Zwraca id usuwanego obiektu
 
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("id", data_id);
