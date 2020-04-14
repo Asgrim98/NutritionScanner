@@ -9,6 +9,7 @@ import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 
 
+import android.content.ContentUris;
 import android.content.Intent;
 
 
@@ -21,6 +22,7 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -33,18 +35,13 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    Toolbar toolbar;
     ListView lv;
-
     SimpleCursorAdapter dbAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        toolbar = findViewById(R.id.this_toolbar);
-        setSupportActionBar(toolbar);
 
         //mDBHelper = new DBHelper(this);
         //mBD = mDBHelper.getWritableDatabase();
@@ -54,46 +51,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         lv = findViewById(R.id.lista);
         startLoader();
 
-        //lv.setClickable(true);
-
-        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        lv.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-                                          @Override
-                                          public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-
-                                              return false;
-                                          }
-
-                                          @Override
-                                          public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                                              MenuInflater pump = actionMode.getMenuInflater();
-                                              pump.inflate(R.menu.delete_menu, menu);
-                                              return true;
-
-                                          }
-
-                                          @Override
-                                          public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-
-                                              switch (menuItem.getItemId()) {
-                                                  case R.id.multiple_delete:
-                                                      //kasujZaznaczone();
-                                                      return true;
-                                              }
-
-                                              return false;
-                                          }
-
-                                          @Override
-                                          public void onDestroyActionMode(ActionMode actionMode) {
-
-                                          }
-
-                                          @Override
-                                          public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
-
-                                          }
-                                      });
+        lv.setClickable(true);
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -118,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
                 product = new Product(list);
 
+                cursor.close();
+
                 Intent intent = new Intent(getApplicationContext(), EditingDataActivity.class);
                 intent.putExtra("product", product); // "PRODUCT_MODE for bar codes
                 intent.putExtra("id", list.get(0));
@@ -125,7 +85,43 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
+        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        lv.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+                                          @Override
+                                          public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
 
+                                              MenuInflater inflater = actionMode.getMenuInflater();
+                                              inflater.inflate(R.menu.delete_menu, menu);
+                                              return true;
+                                          }
+
+                                          @Override
+                                          public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                                                return false;
+                                          }
+
+                                          @Override
+                                          public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+
+                                              switch (menuItem.getItemId()) {
+                                                  case R.id.multiple_delete:
+                                                      kasujZaznaczone();
+                                                      return true;
+                                              }
+
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public void onDestroyActionMode(ActionMode actionMode) {
+
+                                          }
+
+                                          @Override
+                                          public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+
+                                          }
+                                      });
     }
 
     @Override
@@ -184,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 Product product = (Product) data.getSerializableExtra("product");
                 product.putValues();
 
-                Uri uriNowego = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );
+                Uri newUri = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );
             }
         }
 
@@ -211,6 +207,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                // mBD.delete(DBHelper.TABLE, DBHelper.ID + " = '" + id + "';", null);
 
             }
+        }
+    }
+
+    private void kasujZaznaczone() {
+        long[] zaznaczone = lv.getCheckedItemIds();
+        String[] projection = { DBHelper.ID, DBHelper.COL1, DBHelper.COL2, DBHelper.COL3, DBHelper.COL4, DBHelper.COL5, DBHelper.COL6 };
+
+        for (int i = 0; i < zaznaczone.length; i++) {
+
+            getContentResolver().delete( Provider.URI_ZAWARTOSCI, DBHelper.ID + "=" + zaznaczone[i], null);
         }
     }
 

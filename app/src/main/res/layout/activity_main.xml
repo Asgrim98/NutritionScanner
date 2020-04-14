@@ -9,18 +9,14 @@ android:paddingLeft="0dp"
 android:paddingRight="0dp"
 android:usesCleartextTraffic="true">
 
-    <include
-        android:id="@+id/this_toolbar"
-        layout="@layout/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/lista"
         android:choiceMode="multipleChoice"
-        android:background="@drawable/list_background_selector"
+
 
         />
 
