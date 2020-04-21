@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-android:orientation="vertical"
-android:paddingLeft="0dp"
-android:paddingRight="0dp"
-android:usesCleartextTraffic="true">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:usesCleartextTraffic="true">
 
 
+    <TextView
+        android:id="@+id/emptyListInformation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lista pusta dodaj wartosci"
+        android:textAlignment="center" />
 
     <ListView
+        android:id="@+id/lista"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/lista"
         android:choiceMode="multipleChoice"
-
-
-        />
+        android:alpha="1"/>
 
 
 </LinearLayout>

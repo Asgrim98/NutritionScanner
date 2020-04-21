@@ -3,8 +3,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
     android:orientation="vertical"
 
     >
@@ -21,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Product Name"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/productNameEdit"
@@ -40,11 +38,11 @@
 
         <TextView
             android:id="@+id/kcal"
-            android:layout_width="wrap_content"
+            android:layout_width="114dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/calories"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/kcalEdit"
@@ -65,18 +63,20 @@
 
         <TextView
             android:id="@+id/fat"
-            android:layout_width="126dp"
+            android:layout_width="114dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Fat"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/fatEdit"
-            android:layout_width="250dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:ems="10"
-            android:inputType="number"
-            android:hint="fat"/>
+            android:hint="fat"
+            android:inputType="number" />
 
     </LinearLayout>
 
@@ -87,11 +87,11 @@
 
         <TextView
             android:id="@+id/carbohydrates"
-            android:layout_width="wrap_content"
+            android:layout_width="114dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Carbohydrates"
-            android:textSize="24sp" />
+            android:textSize="16sp" />
 
         <EditText
             android:id="@+id/carbohydratesEdit"
@@ -99,8 +99,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="number"
-            android:hint="Carbohydrates"/>
+            android:hint="Carbohydrates"
+            android:inputType="number" />
     </LinearLayout>
 
     <LinearLayout
@@ -110,11 +110,11 @@
 
         <TextView
             android:id="@+id/protein"
-            android:layout_width="wrap_content"
+            android:layout_width="114dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Proteins"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/proteinEdit"
@@ -122,8 +122,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="number"
-            android:hint="Proteins"/>
+            android:hint="Proteins"
+            android:inputType="number" />
     </LinearLayout>
 
     <LinearLayout
@@ -133,11 +133,11 @@
 
         <TextView
             android:id="@+id/link"
-            android:layout_width="wrap_content"
+            android:layout_width="114dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Link"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/linkEdit"
@@ -151,15 +151,15 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="169dp"
-        android:orientation="horizontal" >
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/resultIntent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Button" />
+            android:text="Save" />
     </LinearLayout>
 
 </LinearLayout>

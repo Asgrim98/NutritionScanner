@@ -15,6 +15,7 @@ import android.content.Intent;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -28,6 +29,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -43,16 +45,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ///Kod wykorzystywany gdy chcemy stwozryc nowa tabele w BD
-        //mDBHelper = new DBHelper(this);
-        //mBD = mDBHelper.getWritableDatabase();
+        //Kod wykorzystywany gdy chcemy stwozryc nowa tabele w BD
+        //DBHelper mDBHelper = new DBHelper(this);
+        //SQLiteDatabase mBD = mDBHelper.getWritableDatabase();
         //mBD.execSQL( DBHelper.DROP_TAB );
         //mBD.execSQL( DBHelper.CREATE);
 
         lv = findViewById(R.id.lista);  ///Tworze obiekt list View i dodaje odpowiednie listenery
         startLoader();
 
+        lv.setEmptyView(findViewById(R.id.emptyListInformation)); //Wyswietla informacje o pustej liscie
+
+
         lv.setClickable(true);
+
+
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -183,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 product.putValues();
 
                 Uri newUri = getContentResolver().insert( Provider.URI_ZAWARTOSCI, product.getValue() );    ///DODANIE DO BD
+
             }
         }
 
@@ -196,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 product.putValues();
                 getContentResolver().update( Provider.URI_ZAWARTOSCI, product.getValue(),DBHelper.ID+"=" + id , null );
+
 
                 //mBD.update(DBHelper.TABLE, product.getValue(), DBHelper.ID+"=" + id, null);
             }
@@ -211,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         }
     }
+
 
     private void deleteSelected() { ///USUNICIE WIELU ELEMENTOW
         long[] zaznaczone = lv.getCheckedItemIds(); ///Pobieramy liste id zaznaczonych elementow
@@ -238,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         String[] projection = { DBHelper.ID, DBHelper.COL1, DBHelper.COL6 };
         CursorLoader loaderKursora = new CursorLoader(this,
                 Provider.URI_ZAWARTOSCI, projection, null,null, null);
+
 
         return loaderKursora;
     }
